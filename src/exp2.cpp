@@ -20,7 +20,6 @@ void setup()
 {
   pinMode(ledA, OUTPUT);
   pinMode(ledB, OUTPUT);
-  // Botões no esquema Simulide costumam ter pull-up e ativam em LOW
   pinMode(bt1, INPUT_PULLUP);
   pinMode(bt2, INPUT_PULLUP);
   pinMode(bt3, INPUT_PULLUP);

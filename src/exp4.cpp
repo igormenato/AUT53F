@@ -50,7 +50,5 @@ void loop()
   shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, 0x0F);
   digitalWrite(LATCH_PIN, HIGH);
 
-  // "Com Flicker": Pequeno delay que faz o display piscar se estivéssemos varrendo,
-  // ou simplesmente mostra atualização lenta. Se o objetivo é ver a varredura falhar:
   delay(50); // Introduz flicker visível se houvesse varredura
 }

@@ -2,18 +2,13 @@
   Experiência 03 - Sequencial de LEDs com inversão de direção
   - Chave sem interrupção (A1): Inverte direção via Polling.
   - Chave com interrupção (A2): Inverte direção via PCINT (Pin Change Interrupt).
-
-  AJUSTE: Lógica invertida para LEDs (Active LOW).
-  - LOW = Acende
-  - HIGH = Apaga
-  Isso corrige o efeito de "rasto" deixando apenas 1 LED aceso.
 */
 
 #include <Arduino.h>
 
 const int leds[] = {10, 11, 12, 13};
 const int btPolled = A1;
-const int btInterrupt = A2; // Usaremos PCINT1
+const int btInterrupt = A2; // PCINT1
 
 volatile bool direcao = true; // true = 10->13, false = 13->10
 bool lastBtPolled = HIGH;

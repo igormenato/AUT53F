@@ -27,8 +27,8 @@ void setup()
 
 void loop()
 {
-  // Incrementa contador a cada 100ms (velocidade rápida para teste)
-  if (millis() - tempoAnterior > 100)
+  // Incrementa contador a cada 10ms
+  if (millis() - tempoAnterior > 10)
   {
     valorContador++;
     if (valorContador > 9999)
