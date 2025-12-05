@@ -1,7 +1,7 @@
 /*
   Experiência 02 - Ligar e desligar 2 leds de forma alternada
-  - Pressionar SW1 (A1): Liga modo alternado.
-  - Soltar SW2 (A2): Desliga tudo (ou para alternância).
+  - Pressionar SW1 (A1): Alterna manualmente entre ledA e ledB.
+  - Soltar SW2 (A2): Desliga tudo.
   - Manter SW3 (A3): Pisca alternado rápido enquanto pressionado (função 'manter').
 */
 
@@ -13,8 +13,9 @@ const int bt1 = A1;
 const int bt2 = A2;
 const int bt3 = A3;
 
-bool sistemaAtivo = false;
-bool estadoBt2Anterior = HIGH; // Para detectar 'soltar' (Borda de subida)
+bool ledState = false;         // false = ledA, true = ledB
+bool estadoBt1Anterior = HIGH; // Para detectar 'pressionar' SW1
+bool estadoBt2Anterior = HIGH; // Para detectar 'soltar' SW2
 
 void setup()
 {
@@ -32,16 +33,18 @@ void loop()
   bool b2State = digitalRead(bt2);
   bool b3State = digitalRead(bt3);
 
-  // 1. Pressionar a chave SW1 (Detecta nível LOW) -> Ativa sistema
-  if (b1State == LOW)
+  // 1. Pressionar a chave SW1 (Detecta transição HIGH -> LOW) -> Alterna LEDs manualmente
+  if (estadoBt1Anterior == HIGH && b1State == LOW)
   {
-    sistemaAtivo = true;
+    ledState = !ledState;
+    digitalWrite(ledA, !ledState);
+    digitalWrite(ledB, ledState);
   }
+  estadoBt1Anterior = b1State;
 
   // 2. Soltar a chave SW2 (Detecta transição LOW -> HIGH)
   if (estadoBt2Anterior == LOW && b2State == HIGH)
   {
-    sistemaAtivo = false;
     digitalWrite(ledA, LOW);
     digitalWrite(ledB, LOW);
   }
@@ -57,21 +60,5 @@ void loop()
     digitalWrite(ledA, LOW);
     digitalWrite(ledB, HIGH);
     delay(100);
-  }
-  else if (sistemaAtivo)
-  {
-    // Modo alternado padrão (ativado pelo SW1)
-    digitalWrite(ledA, HIGH);
-    digitalWrite(ledB, LOW);
-    delay(500);
-    digitalWrite(ledA, LOW);
-    digitalWrite(ledB, HIGH);
-    delay(500);
-  }
-  else
-  {
-    // Estado de repouso
-    digitalWrite(ledA, LOW);
-    digitalWrite(ledB, LOW);
   }
 }
