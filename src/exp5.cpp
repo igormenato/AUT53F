@@ -1,7 +1,7 @@
 /*
   Experiência 05 - Contador de 0000 a 9999:
   - Utiliza multiplexação (varredura) para exibir 4 dígitos diferentes.
-  - Incrementa a cada 10ms.
+  - Incrementa a cada ciclo de display (~16ms).
 */
 
 #include <Arduino.h>
@@ -18,7 +18,6 @@ const byte segMap[] = {
 
 // Variáveis de estado
 int valorContador = 0;
-unsigned long tempoAnterior = 0;
 
 // Protótipo da função
 void mostrarNoDisplay(int valor);
@@ -33,14 +32,10 @@ void setup()
 
 void loop()
 {
-  // --- Incrementa contador a cada 10ms ---
-  if (millis() - tempoAnterior > 10)
-  {
-    valorContador++;
-    if (valorContador > 9999)
-      valorContador = 0;
-    tempoAnterior = millis();
-  }
+  // --- Incrementa contador a cada ciclo de display (~16ms) ---
+  valorContador++;
+  if (valorContador > 9999)
+    valorContador = 0;
 
   mostrarNoDisplay(valorContador);
 }
