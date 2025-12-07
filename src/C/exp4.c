@@ -15,6 +15,8 @@
 #define DATA_PIN PB0  // Pino 8 - DS (dados)
 #define LATCH_PIN PD4 // Pino 4 - STCP (latch)
 #define CLOCK_PIN PD7 // Pino 7 - SHCP (clock)
+#define TICK_MS 50
+#define TICKS_PER_STEP 20
 
 // Mapa de segmentos para display 7 segmentos (Anodo Comum)
 // Valores: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, b, C, d, E, F
@@ -24,7 +26,7 @@ static const uint8_t segMap[] = {
 
 // Variáveis de estado
 static uint8_t contador = 0;
-static uint16_t delayCounter = 0;
+static uint16_t tickCounter = 0;
 
 // Função para enviar um byte via shiftOut (MSB primeiro)
 static void shiftOut(uint8_t data)
@@ -45,41 +47,35 @@ static void shiftOut(uint8_t data)
     }
 }
 
-void setup(void)
+static void init_io(void)
 {
-    // --- Configuração dos pinos como saída ---
     DDRB |= (1 << DATA_PIN);
     DDRD |= (1 << LATCH_PIN) | (1 << CLOCK_PIN);
 }
 
-void loop(void)
+static void write_display(uint8_t value)
 {
-    // --- Incrementa contador a cada ~1 segundo (20 iterações * 50ms) ---
-    delayCounter++;
-    if (delayCounter >= 20)
-    {
-        contador++;
-        if (contador > 15)
-            contador = 0;
-        delayCounter = 0;
-    }
-
-    // --- Envia dados para os displays ---
-    // 0x0F liga todos os 4 dígitos simultaneamente
     PORTD &= ~(1 << LATCH_PIN); // Latch LOW
-    shiftOut(segMap[contador]); // Segmentos
+    shiftOut(segMap[value]);    // Segmentos
     shiftOut(0x0F);             // Seleção de dígitos
     PORTD |= (1 << LATCH_PIN);  // Latch HIGH
-
-    _delay_ms(50);
 }
 
 int main(void)
 {
-    setup();
+    init_io();
     while (1)
     {
-        loop();
+        // Incrementa contador a cada ~1 segundo (20 iterações * 50ms)
+        tickCounter++;
+        if (tickCounter >= TICKS_PER_STEP)
+        {
+            contador = (uint8_t)((contador + 1) & 0x0F);
+            tickCounter = 0;
+        }
+
+        write_display(contador);
+        _delay_ms(TICK_MS);
     }
     return 0;
 }

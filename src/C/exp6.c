@@ -16,6 +16,8 @@
 #define LATCH_PIN PD4 // Pino 4 - STCP (latch)
 #define CLOCK_PIN PD7 // Pino 7 - SHCP (clock)
 #define POT_CHANNEL 0 // Canal ADC0 (A0)
+#define DIGIT_ON_MS 4
+#define DISPLAY_DIGITS 4
 
 // Mapa de segmentos para display 7 segmentos (Anodo Comum)
 // Valores: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -39,6 +41,12 @@ static void shiftOut(uint8_t data)
 
         data <<= 1;
     }
+}
+
+static void init_io(void)
+{
+    DDRB |= (1 << DATA_PIN);
+    DDRD |= (1 << LATCH_PIN) | (1 << CLOCK_PIN);
 }
 
 // Inicialização do ADC
@@ -78,39 +86,24 @@ static void mostrarNoDisplay(uint16_t valor)
     d[3] = valor % 10;          // Unidade
 
     // Varredura dos 4 dígitos
-    for (uint8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < DISPLAY_DIGITS; i++)
     {
         PORTD &= ~(1 << LATCH_PIN); // Latch LOW
         shiftOut(segMap[d[i]]);     // Segmentos
         shiftOut(1 << i);           // Seleção do dígito
         PORTD |= (1 << LATCH_PIN);  // Latch HIGH
-        _delay_ms(4);               // Delay para persistência visual
+        _delay_ms(DIGIT_ON_MS);     // Delay para persistência visual
     }
-}
-
-void setup(void)
-{
-    // --- Configuração dos pinos como saída ---
-    DDRB |= (1 << DATA_PIN);
-    DDRD |= (1 << LATCH_PIN) | (1 << CLOCK_PIN);
-
-    // --- Inicializa ADC ---
-    adcInit();
-}
-
-void loop(void)
-{
-    // --- Leitura do potenciômetro ---
-    uint16_t leitura = adcRead(POT_CHANNEL); // Valor de 0 a 1023
-    mostrarNoDisplay(leitura);
 }
 
 int main(void)
 {
-    setup();
+    init_io();
+    adcInit();
     while (1)
     {
-        loop();
+        uint16_t leitura = adcRead(POT_CHANNEL); // Valor de 0 a 1023
+        mostrarNoDisplay(leitura);
     }
     return 0;
 }

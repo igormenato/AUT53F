@@ -15,6 +15,9 @@
 #define DATA_PIN PB0  // Pino 8 - DS (dados)
 #define LATCH_PIN PD4 // Pino 4 - STCP (latch)
 #define CLOCK_PIN PD7 // Pino 7 - SHCP (clock)
+#define DIGIT_ON_MS 4
+#define DISPLAY_DIGITS 4
+#define COUNT_MAX 9999
 
 // Mapa de segmentos para display 7 segmentos (Anodo Comum)
 // Valores: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -23,7 +26,6 @@ static const uint8_t segMap[] = {
 
 // Variáveis de estado
 static uint16_t valorContador = 0;
-static uint8_t cycleCount = 0;
 
 // Função para enviar um byte via shiftOut (MSB primeiro)
 static void shiftOut(uint8_t data)
@@ -44,6 +46,12 @@ static void shiftOut(uint8_t data)
     }
 }
 
+static void init_io(void)
+{
+    DDRB |= (1 << DATA_PIN);
+    DDRD |= (1 << LATCH_PIN) | (1 << CLOCK_PIN);
+}
+
 // Função de multiplexação do display
 static void mostrarNoDisplay(uint16_t valor)
 {
@@ -55,46 +63,29 @@ static void mostrarNoDisplay(uint16_t valor)
     uint8_t digitoValores[] = {milhar, centena, dezena, unidade};
 
     // Varredura dos 4 dígitos
-    for (uint8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < DISPLAY_DIGITS; i++)
     {
         PORTD &= ~(1 << LATCH_PIN);         // Latch LOW
         shiftOut(segMap[digitoValores[i]]); // Segmentos
         shiftOut(1 << i);                   // Seleção do dígito
         PORTD |= (1 << LATCH_PIN);          // Latch HIGH
-        _delay_ms(4);                       // Delay para persistência visual
+        _delay_ms(DIGIT_ON_MS);             // Delay para persistência visual
     }
-}
-
-void setup(void)
-{
-    // --- Configuração dos pinos como saída ---
-    DDRB |= (1 << DATA_PIN);
-    DDRD |= (1 << LATCH_PIN) | (1 << CLOCK_PIN);
-}
-
-void loop(void)
-{
-    // --- Incrementa contador aproximadamente a cada 10ms ---
-    // Como mostrarNoDisplay leva ~16ms (4 dígitos * 4ms), incrementamos a cada ciclo
-    // Para simular ~10ms, contamos ciclos
-    cycleCount++;
-    if (cycleCount >= 1) // Aproximadamente cada ciclo de display (~16ms)
-    {
-        valorContador++;
-        if (valorContador > 9999)
-            valorContador = 0;
-        cycleCount = 0;
-    }
-
-    mostrarNoDisplay(valorContador);
 }
 
 int main(void)
 {
-    setup();
+    init_io();
     while (1)
     {
-        loop();
+        valorContador++;
+        if (valorContador > COUNT_MAX)
+        {
+            valorContador = 0;
+        }
+
+        mostrarNoDisplay(valorContador);
     }
+
     return 0;
 }

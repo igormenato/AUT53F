@@ -9,6 +9,7 @@
 #define F_CPU 16000000UL
 #endif
 
+#include <stdbool.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -18,21 +19,23 @@
 #define BT1_PIN PC1   // Pino A1
 #define BT2_PIN PC2   // Pino A2
 #define BT3_PIN PC3   // Pino A3
+#define DEBOUNCE_MS 50
+#define BLINK_MS 100
 
 // Variáveis de estado
-static uint8_t ledState = 0;          // 0 = ledA aceso, 1 = ledB aceso
-static uint8_t estadoBt1Anterior = 1; // Estado anterior do botão 1 (HIGH)
-static uint8_t estadoBt2Anterior = 1; // Estado anterior do botão 2 (HIGH)
+static bool ledASelected = true;
+static bool lastBt1Released = true;
+static bool lastBt2Pressed = false;
 
 // Funções auxiliares para leitura de botões (com pull-up: 0 = pressionado)
-static inline uint8_t readButton(uint8_t pin)
+static inline bool button_is_pressed(uint8_t pin)
 {
-    return (PINC & (1 << pin)) ? 1 : 0;
+    return (PINC & (1 << pin)) == 0;
 }
 
-static void updateLeds(void)
+static void update_leds(void)
 {
-    if (ledState == 0)
+    if (ledASelected)
     {
         PORTB |= (1 << LED_A_PIN);  // LED A ON
         PORTB &= ~(1 << LED_B_PIN); // LED B OFF
@@ -44,7 +47,7 @@ static void updateLeds(void)
     }
 }
 
-void setup(void)
+static void setup(void)
 {
     // --- Configuração dos pinos de LED como saída ---
     DDRB |= (1 << LED_A_PIN) | (1 << LED_B_PIN);
@@ -54,44 +57,44 @@ void setup(void)
     PORTC |= (1 << BT1_PIN) | (1 << BT2_PIN) | (1 << BT3_PIN);
 
     // --- Estado inicial dos LEDs ---
-    updateLeds();
+    update_leds();
 }
 
-void loop(void)
+static void loop_once(void)
 {
     // --- Leitura dos botões ---
-    uint8_t b1State = readButton(BT1_PIN);
-    uint8_t b2State = readButton(BT2_PIN);
-    uint8_t b3State = readButton(BT3_PIN);
+    bool b1Pressed = button_is_pressed(BT1_PIN);
+    bool b2Pressed = button_is_pressed(BT2_PIN);
+    bool b3Pressed = button_is_pressed(BT3_PIN);
 
     // --- SW1: Pressionar (Transição HIGH -> LOW) ---
-    if (estadoBt1Anterior == 1 && b1State == 0)
+    if (lastBt1Released && b1Pressed)
     {
-        ledState = !ledState;
-        updateLeds();
-        _delay_ms(50); // Debounce
+        ledASelected = !ledASelected;
+        update_leds();
+        _delay_ms(DEBOUNCE_MS);
     }
-    estadoBt1Anterior = b1State;
+    lastBt1Released = !b1Pressed;
 
     // --- SW2: Soltar (Transição LOW -> HIGH) ---
-    if (estadoBt2Anterior == 0 && b2State == 1)
+    if (lastBt2Pressed && !b2Pressed)
     {
-        ledState = !ledState;
-        updateLeds();
-        _delay_ms(50); // Debounce
+        ledASelected = !ledASelected;
+        update_leds();
+        _delay_ms(DEBOUNCE_MS);
     }
-    estadoBt2Anterior = b2State;
+    lastBt2Pressed = b2Pressed;
 
     // --- SW3: Manter pressionado (Nível LOW) ---
-    if (b3State == 0)
+    if (b3Pressed)
     {
         PORTB |= (1 << LED_A_PIN);
         PORTB &= ~(1 << LED_B_PIN);
-        _delay_ms(100);
+        _delay_ms(BLINK_MS);
         PORTB &= ~(1 << LED_A_PIN);
         PORTB |= (1 << LED_B_PIN);
-        _delay_ms(100);
-        ledState = 1; // Atualiza estado ao soltar
+        _delay_ms(BLINK_MS);
+        ledASelected = false; // Atualiza estado ao soltar
     }
 }
 
@@ -100,7 +103,7 @@ int main(void)
     setup();
     while (1)
     {
-        loop();
+        loop_once();
     }
     return 0;
 }
