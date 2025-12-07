@@ -76,14 +76,14 @@ static uint16_t adcRead(uint8_t channel)
 }
 
 // Função de multiplexação do display
-static void mostrarNoDisplay(uint16_t valor)
+static void show_on_display(uint16_t value)
 {
     // Separa os dígitos
     uint8_t d[4];
-    d[0] = (valor / 1000) % 10; // Milhar
-    d[1] = (valor / 100) % 10;  // Centena
-    d[2] = (valor / 10) % 10;   // Dezena
-    d[3] = valor % 10;          // Unidade
+    d[0] = (value / 1000) % 10; // Milhar
+    d[1] = (value / 100) % 10;  // Centena
+    d[2] = (value / 10) % 10;   // Dezena
+    d[3] = value % 10;          // Unidade
 
     // Varredura dos 4 dígitos
     for (uint8_t i = 0; i < DISPLAY_DIGITS; i++)
@@ -102,8 +102,8 @@ int main(void)
     adcInit();
     while (1)
     {
-        uint16_t leitura = adcRead(POT_CHANNEL); // Valor de 0 a 1023
-        mostrarNoDisplay(leitura);
+        uint16_t reading = adcRead(POT_CHANNEL); // Valor de 0 a 1023
+        show_on_display(reading);
     }
     return 0;
 }

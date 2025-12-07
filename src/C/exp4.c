@@ -25,7 +25,7 @@ static const uint8_t segMap[] = {
     0x80, 0x90, 0x88, 0x83, 0xC6, 0xA1, 0x86, 0x8E};
 
 // Variáveis de estado
-static uint8_t contador = 0;
+static uint8_t counter = 0;
 static uint16_t tickCounter = 0;
 
 // Função para enviar um byte via shiftOut (MSB primeiro)
@@ -70,11 +70,11 @@ int main(void)
         tickCounter++;
         if (tickCounter >= TICKS_PER_STEP)
         {
-            contador = (uint8_t)((contador + 1) & 0x0F);
+            counter = (uint8_t)((counter + 1) & 0x0F);
             tickCounter = 0;
         }
 
-        write_display(contador);
+        write_display(counter);
         _delay_ms(TICK_MS);
     }
     return 0;

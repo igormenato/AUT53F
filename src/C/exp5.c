@@ -25,7 +25,7 @@ static const uint8_t segMap[] = {
     0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90};
 
 // Variáveis de estado
-static uint16_t valorContador = 0;
+static uint16_t counterValue = 0;
 
 // Função para enviar um byte via shiftOut (MSB primeiro)
 static void shiftOut(uint8_t data)
@@ -53,23 +53,23 @@ static void init_io(void)
 }
 
 // Função de multiplexação do display
-static void mostrarNoDisplay(uint16_t valor)
+static void show_on_display(uint16_t value)
 {
     // Separa os dígitos
-    uint8_t milhar = (valor / 1000) % 10;
-    uint8_t centena = (valor / 100) % 10;
-    uint8_t dezena = (valor / 10) % 10;
-    uint8_t unidade = valor % 10;
-    uint8_t digitoValores[] = {milhar, centena, dezena, unidade};
+    uint8_t thousands = (value / 1000) % 10;
+    uint8_t hundreds = (value / 100) % 10;
+    uint8_t tens = (value / 10) % 10;
+    uint8_t ones = value % 10;
+    uint8_t digitValues[] = {thousands, hundreds, tens, ones};
 
     // Varredura dos 4 dígitos
     for (uint8_t i = 0; i < DISPLAY_DIGITS; i++)
     {
-        PORTD &= ~(1 << LATCH_PIN);         // Latch LOW
-        shiftOut(segMap[digitoValores[i]]); // Segmentos
-        shiftOut(1 << i);                   // Seleção do dígito
-        PORTD |= (1 << LATCH_PIN);          // Latch HIGH
-        _delay_ms(DIGIT_ON_MS);             // Delay para persistência visual
+        PORTD &= ~(1 << LATCH_PIN);       // Latch LOW
+        shiftOut(segMap[digitValues[i]]); // Segmentos
+        shiftOut(1 << i);                 // Seleção do dígito
+        PORTD |= (1 << LATCH_PIN);        // Latch HIGH
+        _delay_ms(DIGIT_ON_MS);           // Delay para persistência visual
     }
 }
 
@@ -78,13 +78,13 @@ int main(void)
     init_io();
     while (1)
     {
-        valorContador++;
-        if (valorContador > COUNT_MAX)
+        counterValue++;
+        if (counterValue > COUNT_MAX)
         {
-            valorContador = 0;
+            counterValue = 0;
         }
 
-        mostrarNoDisplay(valorContador);
+        show_on_display(counterValue);
     }
 
     return 0;

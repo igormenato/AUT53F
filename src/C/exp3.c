@@ -34,7 +34,7 @@ static const uint8_t ledPins[] = {LED0_PIN, LED1_PIN, LED2_PIN, LED3_PIN};
 // Variáveis de estado
 static volatile bool direction_forward = true; // 1 = 10->13, 0 = 13->10
 static bool lastBtPolledReleased = true;
-static int8_t atual = 0; // LED atual
+static int8_t currentIndex = 0; // LED atual
 
 static inline bool button_is_pressed(uint8_t pin)
 {
@@ -59,20 +59,20 @@ static void init_pcint(void)
 static void advance_led(void)
 {
     PORTB |= LED_MASK; // Apaga todos (HIGH = Off)
-    PORTB &= ~(1 << ledPins[atual]);
+    PORTB &= ~(1 << ledPins[currentIndex]);
     _delay_ms(STEP_DELAY_MS);
 
     if (direction_forward)
     {
-        atual++;
-        if (atual > 3)
-            atual = 0;
+        currentIndex++;
+        if (currentIndex > 3)
+            currentIndex = 0;
     }
     else
     {
-        atual--;
-        if (atual < 0)
-            atual = 3;
+        currentIndex--;
+        if (currentIndex < 0)
+            currentIndex = 3;
     }
 }
 
