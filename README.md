@@ -13,14 +13,14 @@ AUT53F/
 │   ├── exp4.cpp         # Contador hexadecimal (0-F) em display 7 segmentos
 │   ├── exp5.cpp         # Contador 0000-9999 com multiplexação
 │   ├── exp6.cpp         # Leitura de potenciômetro (A/D) no display
-│   └── C/                    # Versão em C puro
+│   └── C/               # Versão em C puro
 │       ├── exp1.c
 │       ├── exp2.c
 │       ├── exp3.c
 │       ├── exp4.c
 │       ├── exp5.c
 │       └── exp6.c
-├── build/                    # Arquivos compilados (.hex)
+├── build/               # Arquivos compilados (.hex)
 ├── platformio.ini       # Configuração do PlatformIO
 └── extra_script.py      # Script para gerar arquivos .hex
 ```
